@@ -1,0 +1,126 @@
+digraph
+{
+
+Raiz[shape=circle,label="Raíz\n●"]
+{
+    # Inicialização/subsistemas
+    Musica0[shape=circle,label="Sistema de\nsom\n(Não inicializado)\n●"]
+    Tela0[shape=circle,label="GUI\n(Não inic.)\n●"]
+    {
+        rank=same
+        Musica[shape=circle,label="Sistema\nde\nsom"]
+        Tela[shape=circle,label="GUI"]
+    }
+    InstanciaGUI[shape=rect,label="Inicialização\nGUI\\SDL"]
+    InstanciaMusica[shape=rect,label="Inicialização\nSynth"]
+
+    Raiz->InstanciaMusica
+    Musica0->InstanciaMusica
+    InstanciaMusica->Raiz
+    InstanciaMusica->Musica
+
+    Raiz->InstanciaGUI
+    Tela0->InstanciaGUI
+    InstanciaGUI->Tela
+    InstanciaGUI->Raiz
+}
+
+EntraJogo[shape=rect, label="Iniciar\njogo"]
+Raiz->EntraJogo
+Tela->EntraJogo
+Musica->EntraJogo
+EntraJogo->InicioFrame
+EntraJogo->Tela
+EntraJogo->Musica
+
+subgraph cluster_jogo
+{
+    label="Jogo ativo"
+    # Loop de jogo    
+    InicioFrame[shape=circle, label="Início\nde\nframe"]
+    DesenhaSprite[shape=circle, label="Desenha\num\núnico sprite"]
+    T0guardado[shape=rect, label="T0 Guardado"]
+    InicioFrame->T0guardado
+    T0guardado->DesenhaSprite
+    Loop[shape=rect, label="Frame terminado\nIdle no resto\nda janela"]
+    DesenhaSprite->Loop
+    Loop->InicioFrame
+
+    ComandoSaida[shape=circle, label="Comando\nde\nsaída"]
+    Sair[shape=rect, label="Trigger\nSaída"]
+    ComandoSaida->Sair
+    InicioFrame->Sair
+    Sair->Fim
+    Sair->Fim
+}
+
+subgraph cluster_synth
+{
+    label="Synth/Sistema de som"
+    # Sistema de som
+    Musica
+    ThreadSynth0[shape=circle,label="Thread\nde síntese\nesperando\n●"]
+    ThreadSynth[shape=circle, label="Thread\nde\nsíntese"]
+    SynthInit[shape=rect, label="Síntese\niniciada"]
+    Musica->SynthInit
+    ThreadSynth0->SynthInit
+    SynthInit->ThreadSynth
+    SynthInit->Musica
+    subgraph cluster_notas
+    {
+        label="Processamento de amostras\\notas"
+        SDLPedeSample[shape=circle, label="SDL pede\namostras"]
+        SDLEspera[shape=circle, label="SDL\nesperando"]
+        SDLRecebeSample[shape=circle, label="SDL Recebe\namostras"]
+        BatidaAconteceu[shape=circle, label="Batida\naconteceu"]
+        Groove[shape=circle, label="Na onda\n●"]
+        ThreadOcupada[shape=circle, label="Calculando"]
+
+        Pedido[shape=rect, label="Pedido\nrecebido"]
+        ThreadSynth->Pedido
+        SDLPedeSample->Pedido
+        Pedido->ThreadOcupada
+        Pedido->SDLEspera
+        
+        AvisaBatida[shape=rect, label="Avisar jogo\nque teve batida"]
+        Groove->AvisaBatida[label="Algum instrumento\nmarcado como batida\ncomeçou nota"]
+        ThreadOcupada->AvisaBatida[label="1"]
+        AvisaBatida->BatidaAconteceu
+        AvisaBatida->ThreadOcupada
+
+        SomPronto[shape=rect, label="Amostras\nprontas"]
+        ThreadOcupada->SomPronto[label="0"]
+        SDLEspera->SomPronto
+        SomPronto->SDLRecebeSample
+        SomPronto->ThreadSynth
+    }
+
+    subgraph cluster_songs
+    {
+        label="Processamento de músicas"
+        MusicaEnfileirada[shape=circle, label="Jogo enfileirou\nmúsica a tocar"]
+        MusicaTocando[shape=circle, label="Música tocando"]
+        MusicaEncerrada[shape=circle, label="Música\nEncerrada"]
+
+        ProcessarMusica[shape=rect, label="Música processada"]
+        ThreadSynth->ProcessarMusica
+        MusicaEnfileirada->ProcessarMusica
+        ProcessarMusica->ThreadSynth
+        ProcessarMusica->MusicaTocando
+
+        MusicaAcabouLoop[shape=rect, label="Música acabou\n(Loop)"]
+        MusicaAcabou[shape=rect, label="Música acabou"]
+        MusicaTocando->MusicaAcabou
+        ThreadSynth->MusicaAcabou
+        MusicaAcabou->MusicaEncerrada
+        MusicaAcabou->ThreadSynth
+        MusicaTocando->MusicaAcabouLoop[label="Música tem loop"]
+        ThreadSynth->MusicaAcabouLoop
+        MusicaAcabouLoop->MusicaEnfileirada
+        MusicaAcabouLoop->ThreadSynth
+    }
+}
+
+Fim[shape=circle]
+
+}

@@ -7,7 +7,7 @@
 
 # Arquitetura/Premissas
 
-O jogo será modular e organizado por mensagens, permitindo fácil modificação e integração de novos componentes/passos de processamento.
+O jogo será modular e organizado por mensagens (e por composição mais que herança), permitindo fácil modificação e integração de novos componentes/passos de processamento.
 
 # Ideias
 

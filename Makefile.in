@@ -1,0 +1,43 @@
+MAKEFLAGS += --no-print-directory
+
+opcoes:
+	@echo "Targets:"
+	@echo "make testes - Cria os binários de teste"
+	@echo "make jogo - Cria o binário final"
+jogo:
+	@make objs
+	@make assetsobj
+	@mkdir -p build/bin
+	@CC@ @LIBS@ -lstdc++ -o build/bin/jogo build/entrypoints/jogo.o $$(find build/base -name "*.o") $$(find build/assets -name "*.o");
+testes:
+	@make objs
+	@make assetsobj
+	@mkdir -p build/bin/testes
+	@for file in $$(find build/entrypoints -name "*.o");do\
+		make build/bin/testes/$$(basename $$file .o);\
+	done
+build/bin/testes/%: build/entrypoints/%.o build/base/* build/assets/*
+	@CC@ @LIBS@ -g -lstdc++ -o $@ $< $$(find build/base -name "*.o") $$(find build/assets -name "*.o");
+build/base/%.o: src/base/%.cpp
+	@mkdir -p $$(dirname $@)
+	@CC@ -c -o $@ $<
+build/entrypoints/%.o: src/entrypoints/%.cpp
+	@mkdir -p $$(dirname $@)
+	@CC@ -c -o $@ $<
+objs:
+	@mkdir -p build/base
+	@mkdir -p build/entrypoints
+	@for file in $$(cd src/base; find . -name "*.cpp");do\
+		make build/base/$$(dirname $$file)/$$(basename $$file .cpp).o;\
+	done
+	@for file in $$(cd src/entrypoints; find . -name "*.cpp");do\
+		make build/entrypoints/$$(dirname $$file)/$$(basename $$file .cpp).o;\
+	done
+build/assets/%.o: assets/%
+	@mkdir -p $$(dirname $<)
+	@OBJCOPY@ -I binary -O elf64-x86-64 $< $@
+assetsobj:
+	@mkdir -p build/assets
+	@for file in $$(find assets -type f);do\
+		make build/$$file.o;\
+	done

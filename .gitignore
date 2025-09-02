@@ -1,0 +1,19 @@
+# GNU Autotools
+config.log
+config.status
+autom4te.cache
+install-sh
+compile
+missing
+autoconf.h.in
+aclocal.m4
+
+# Resultados autotools
+
+configure~
+Makefile
+depcomp
+**/stamp-*
+
+# Build
+build

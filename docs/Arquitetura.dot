@@ -1,0 +1,13 @@
+digraph
+{
+    Janela[shape=record, label="{Janela|Controla interação com\na GUI SDL}"]
+    Mundo[shape=record, label="{Mundo|Agrupa sprites|Transforma comandos gráficos no\nespaço de câmera em comandos\nreais}"]
+    ComandoGraficoReal[shape=circle, label="Comandos\nGráficos\n(Espaço real)"]
+    ComandoGraficoCamera[shape=circle, label="Comandos\nGráficos\n(Espaço câmera)"]
+    ComandoGraficoReal->Janela
+    ComandoGraficoCamera->Mundo
+    Mundo->ComandoGraficoReal
+
+    Desenhavel[shape=record, label="{Desenhável|Objeto desenhável}"]
+    Desenhavel->ComandoGraficoCamera
+}

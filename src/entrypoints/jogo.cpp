@@ -24,7 +24,7 @@
 //mas para entregar o requisito de "ter música", vou fazer essa gambiarra e ir dormir
 void gera_notas(void* nulo, SDL_AudioStream* stream, int tanto_min, int tanto_req)
 {
-    static uint16_t freq = 440;
+    static uint16_t freq = 220;
     uint16_t* samples = (uint16_t*) malloc(tanto_req);
 
     //1 sample = 1/16000s
@@ -34,7 +34,7 @@ void gera_notas(void* nulo, SDL_AudioStream* stream, int tanto_min, int tanto_re
     static double progresso = (((double)freq)/(16000));
     static double cur = 0;
     static double secs = 0;
-    static uint16_t nota = 1;
+    static uint16_t seminota = 1;
     static uint16_t notas[]={440, 392, 349, 392};
     /*
     n*2^-5 / m*2^-15
@@ -43,7 +43,7 @@ void gera_notas(void* nulo, SDL_AudioStream* stream, int tanto_min, int tanto_re
     static bool troca=0;
     for(int i=0;i<tanto_req/2;i++)
     {
-        if(!troca)samples[i]=0;
+        if(0 && !troca)samples[i]=0;
         else
         {
             /*
@@ -54,14 +54,15 @@ void gera_notas(void* nulo, SDL_AudioStream* stream, int tanto_min, int tanto_re
         cur+=progresso;
         cur=SDL_fmod(cur, 1.0);
         secs+=1.0/16000;
-        if(secs>0.3)
+        if(secs>0.3/2)
         {
             secs=0.0;
             troca=!troca;
             if(!troca)
             {
-                freq = notas[nota++];
-                nota%=4;
+                freq = notas[seminota/4]/((seminota%2==0?2:1));
+                seminota++;
+                seminota%=16;
                 progresso = (((double)freq)/(16000));
             }
         }

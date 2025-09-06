@@ -4,40 +4,55 @@ opcoes:
 	@echo "Targets:"
 	@echo "make testes - Cria os binários de teste"
 	@echo "make jogo - Cria o binário final"
+	@echo
+	@ if [[ "@ASSETS_COMPRIMIDOS@" ]];then echo "ZLib foi encontrada. Assets serão comprimidos antes do uso.";fi
 jogo:
 	@make objs
 	@make assetsobj
 	@mkdir -p build/bin
-	@CC@ @LIBS@ -lstdc++ -o build/bin/jogo build/entrypoints/jogo.o $$(find build/base -name "*.o") $$(find build/assets -name "*.o");
+	@CXX@ @LIBS@ -lstdc++ -o build/bin/jogo@EXEEXT@ build/entrypoints/jogo.@OBJEXT@ $$(find build/base -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@");
 testes:
 	@make objs
 	@make assetsobj
 	@mkdir -p build/bin/testes
-	@for file in $$(find build/entrypoints -name "*.o");do\
-		make build/bin/testes/$$(basename $$file .o);\
+	@for file in $$(find build/entrypoints -name "*.@OBJEXT@");do\
+		make build/bin/testes/$$(basename $$file .@OBJEXT@);\
 	done
-build/bin/testes/%: build/entrypoints/%.o build/base/* build/assets/*
-	@CC@ @LIBS@ -g -lstdc++ -o $@ $< $$(find build/base -name "*.o") $$(find build/assets -name "*.o");
-build/base/%.o: src/base/%.cpp
+build/bin/testes/%@EXEEXT@: build/entrypoints/%.@OBJEXT@ build/base_debug/* build/assets/*
+	@CXX@ @LIBS@ -g -lstdc++ -o "$@""@EXEEXT@" $< $$(find build/base_debug -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@");
+build/base/%.@OBJEXT@: src/base/%.cpp
 	@mkdir -p $$(dirname $@)
-	@CC@ -c -o $@ $<
-build/entrypoints/%.o: src/entrypoints/%.cpp
+	@CXX@ -c -o $@ $<
+build/base_debug/%.@OBJEXT@: src/base/%.cpp
 	@mkdir -p $$(dirname $@)
-	@CC@ -c -o $@ $<
+	@CXX@ -c -g -o $@ $<
+build/entrypoints/%.@OBJEXT@: src/entrypoints/%.cpp
+	@mkdir -p $$(dirname $@)
+	@CXX@ -c -o "$@" $<
 objs:
 	@mkdir -p build/base
 	@mkdir -p build/entrypoints
 	@for file in $$(cd src/base; find . -name "*.cpp");do\
-		make build/base/$$(dirname $$file)/$$(basename $$file .cpp).o;\
+		make build/base/$$(dirname $$file)/$$(basename $$file .cpp).@OBJEXT@;\
+		make build/base_debug/$$(dirname $$file)/$$(basename $$file .cpp).@OBJEXT@;\
 	done
 	@for file in $$(cd src/entrypoints; find . -name "*.cpp");do\
-		make build/entrypoints/$$(dirname $$file)/$$(basename $$file .cpp).o;\
+		make build/entrypoints/$$(dirname $$file)/$$(basename $$file .cpp).@OBJEXT@;\
 	done
-build/assets/%.o: assets/%
-	@mkdir -p $$(dirname $<)
-	@OBJCOPY@ -I binary -O elf64-x86-64 $< $@
+build/assets/%.@OBJEXT@: assets/%
+	mkdir -p $$(dirname $<)
+	@if [[ "@ASSETS_COMPRIMIDOS@" ]];then\
+		echo "Comprimindo $<";\
+		mv $< $<.tmp;\
+		cat $<.tmp | zlib-flate -compress=9 > $<;\
+		@OBJCOPY@ -I binary -O elf64-x86-64 $< $@;\
+		mv $<.tmp $<;\
+	else\
+		echo "%@";\
+		@OBJCOPY@ -I binary -O elf64-x86-64 $< $@;\
+	fi
 assetsobj:
 	@mkdir -p build/assets
 	@for file in $$(find assets -type f);do\
-		make build/$$file.o;\
+		make build/$$file.@OBJEXT@;\
 	done

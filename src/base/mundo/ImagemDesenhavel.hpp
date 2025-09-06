@@ -22,6 +22,23 @@ namespace IDJ::MUNDO
                 .dest=dest
             }
         {};
+        ImagemDesenhavel(
+            MENSAGENS::Canal<MENSAGENS::ComandoGrafico>& alvo,
+            SDL_Texture* txtr,
+            SDL_Rect clip
+        ):
+            Desenhavel(alvo),
+            sprite{
+                .txtr=txtr,
+                .clip=clip,
+                .dest={
+                    .x=0,
+                    .y=0,
+                    .w=clip.w,
+                    .h=clip.h
+                }
+            }
+        {};
         ~ImagemDesenhavel();
     };
 };

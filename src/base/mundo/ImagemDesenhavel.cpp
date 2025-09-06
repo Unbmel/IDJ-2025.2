@@ -11,4 +11,5 @@ namespace IDJ::MUNDO
             }
         });
     }
+    ImagemDesenhavel::~ImagemDesenhavel(){}
 }

@@ -17,9 +17,13 @@ namespace IDJ::MUNDO
         void add_obj(Objeto* obj);
         void add_desenhavel(ObjetoDesenhavel* obj);
         void desenhar();
+        MENSAGENS::Canal<MENSAGENS::ComandoGrafico>& get_camera();
         struct {int x; int y;} pos_camera;
-        Mundo(MENSAGENS::Canal<MENSAGENS::ComandoGrafico>& real)
-        :camera(this, this->tratar_grafico), real(real){};
+        Mundo(MENSAGENS::Canal<MENSAGENS::ComandoGrafico>& real):
+            camera(this, this->tratar_grafico),
+            real(real),
+            pos_camera{.x=0,.y=0}
+        {};
     };
 }
 #endif

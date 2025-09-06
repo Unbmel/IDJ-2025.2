@@ -16,6 +16,7 @@ namespace IDJ::MUNDO
     {
         for(ObjetoDesenhavel* d:this->desenhaveis)
             d->desenhar();
+        this->real.receber({.tipo=MENSAGENS::ComandoGrafico::COMMIT});
     }
     void Mundo::tratar_grafico(void *ref_obj, MENSAGENS::ComandoGrafico cmd)
     {
@@ -37,5 +38,9 @@ namespace IDJ::MUNDO
             default:
                 self->real.receber(cmd);
         }
+    }
+    MENSAGENS::Canal<MENSAGENS::ComandoGrafico>& Mundo::get_camera()
+    {
+        return this->camera;
     }
 }

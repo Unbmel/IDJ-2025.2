@@ -6,4 +6,5 @@ namespace IDJ::MUNDO
     {
         this->alvo.receber(cmd);
     }
+    Desenhavel::~Desenhavel(){}
 }

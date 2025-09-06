@@ -10,10 +10,17 @@ AC_CONFIG_HEADERS([src/autoconf.h])
 AC_PROG_CXX_C_O
 AC_PROG_MAKE_SET
 AC_CHECK_TOOL([OBJCOPY], [objcopy])
+AC_PATH_PROG([ZFLATE], [zlib-flate])
 
 # Checks for libraries.
 AC_CHECK_LIB([SDL3], [SDL_Init], [], [echo "SDL é estritamente necessário para esse projeto.";exit -1])
-AC_CHECK_LIB([z], [deflate])
+AC_CHECK_LIB([z], [deflate], [LIBS="-lz $LIBS"; Z=1])
+if [[[ "$Z" && "${ZFLATE}" ]]];then
+    echo "##############################################################"
+    echo "#ZLIB e ZFLATE encontrados! Usando compressão para os assets.#"
+    echo "##############################################################"
+    AC_DEFINE([ASSETS_COMPRIMIDOS],[1],[Assets comprimidos])
+fi
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h])

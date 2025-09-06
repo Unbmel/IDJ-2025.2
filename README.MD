@@ -10,9 +10,11 @@ make
 Para compilar para windows com MinGW, você precisará de um cross-compiler. Geralmente há um pacote com "mingw-w64". Pesquise para o seu sistema.
 
 ```sh
-./configure --host=x86_64-w64-mingw32
+./configure --host=x86_64-w64-mingw32 --build=x86_64
 make
 ```
+
+> Assegure que você instalou/compilou a biblioteca .dll para mingw - a SDL sempre libera duas versões diferentes: mingw e "normal".
 
 O projeto é compilado exclusivamente em ambientes com:
 - Bourne shell

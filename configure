@@ -643,6 +643,7 @@ LIBOBJS
 ac_ct_CC
 CFLAGS
 CC
+ZFLATE
 OBJCOPY
 SET_MAKE
 OBJEXT
@@ -3348,6 +3349,52 @@ else
   OBJCOPY="$ac_cv_prog_OBJCOPY"
 fi
 
+# Extract the first word of "zlib-flate", so it can be a program name with args.
+set dummy zlib-flate; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_ZFLATE+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) case $ZFLATE in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ZFLATE="$ZFLATE" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_ZFLATE="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac ;;
+esac
+fi
+ZFLATE=$ac_cv_path_ZFLATE
+if test -n "$ZFLATE"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ZFLATE" >&5
+printf "%s\n" "$ZFLATE" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
 
 # Checks for libraries.
 
@@ -4212,12 +4259,17 @@ fi
 printf "%s\n" "$ac_cv_lib_z_deflate" >&6; }
 if test "x$ac_cv_lib_z_deflate" = xyes
 then :
-  printf "%s\n" "#define HAVE_LIBZ 1" >>confdefs.h
-
-  LIBS="-lz $LIBS"
-
+  LIBS="-lz $LIBS"; Z=1
 fi
 
+if [[ "$Z" && "${ZFLATE}" ]];then
+    echo "##############################################################"
+    echo "#ZLIB e ZFLATE encontrados! Usando compressão para os assets.#"
+    echo "##############################################################"
+
+printf "%s\n" "#define ASSETS_COMPRIMIDOS 1" >>confdefs.h
+
+fi
 
 # Checks for header files.
 ac_header= ac_cache=

@@ -10,7 +10,7 @@ jogo:
 	@make objs
 	@make assetsobj
 	@mkdir -p build/bin
-	@CXX@ @LIBS@ -lstdc++ -o build/bin/jogo@EXEEXT@ build/entrypoints/jogo.@OBJEXT@ $$(find build/base -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@");
+	@CXX@ -o build/bin/jogo@EXEEXT@ build/entrypoints/jogo.@OBJEXT@ $$(find build/base -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@") @LIBS@ -lstdc++ ;
 testes:
 	@make objs
 	@make assetsobj
@@ -19,7 +19,7 @@ testes:
 		make build/bin/testes/$$(basename $$file .@OBJEXT@);\
 	done
 build/bin/testes/%@EXEEXT@: build/entrypoints/%.@OBJEXT@ build/base_debug/* build/assets/*
-	@CXX@ @LIBS@ -g -lstdc++ -o "$@""@EXEEXT@" $< $$(find build/base_debug -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@");
+	@CXX@ -g -o "$@""@EXEEXT@" $< $$(find build/base_debug -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@") @LIBS@ -lstdc++;
 build/base/%.@OBJEXT@: src/base/%.cpp
 	@mkdir -p $$(dirname $@)
 	@CXX@ -c -o $@ $<

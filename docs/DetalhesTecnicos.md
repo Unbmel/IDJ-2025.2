@@ -23,7 +23,7 @@ Sprites foram guardados em um formato simples que chamei de "SBMP".
 
 SBMPs são sequências de imagens de mesmo tamanho com pixels no formato "AIII" (alpha, intensidadex3).
 
-O formato é o seguinte (little-endian):
+O formato é o seguinte (native-endian - pode ser little endian, mas sejamos francos: ninguém vai usar esse formato em algum outro lugar, então que seja como for):
 
 ```
 String "SBM"
@@ -37,3 +37,28 @@ Frames ((altura*largura*frames+1)//2):
 ```
 
 O uso de 16 bits permite que o formato fique pequeno, mas suporte arquivos grandes com muitos frames (o ponteiro máximo para o final de um frame ainda cabe em 32 bits).
+
+# SMIDI
+
+Músicas foram guardadas em um formato simples que chamei de "SMIDI".
+
+SMIDI são tracks únicas similares a um MIDI, mas com estrutura mais simples e facilmente navegável.
+
+O formato é o seguinte (native-endian):
+
+```
+String "SMI"
+16-bit unsigned int tempo - Milissegundos por tempo midi (60bpm = 1000)
+Eventos (tamanho variável, calculável pelo tamanho do arquivo):
+    - byte [TNNNNNNN]
+        - T - Tipo. 0=fim, 1=início
+        - N - Nota MIDI (60 = 261.6156).
+    - byte [IIII.IIII]
+        - Ponto fixo (4 bits), intervalo (em 16 avos de nota) a esperar para lançar o comando
+```
+
+# Síntese
+
+A síntese é limitada pelo fato de estarmos usando uma taxa baixa de sampling e com inteiros de 16 bits para representar os períodos das ondas. Isso causa um efeito interessante: Notas muito agudas acabam saindo "desafinadas" em relação às notas baixas, já que não temos bits suficientes para expressar as diferenças entre as notas.
+
+Decidi deixar assim, mesmo, que o efeito dá uma certa aura "eerie" para o jogo.

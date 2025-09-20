@@ -1,19 +1,26 @@
 #include "Mundo.hpp"
 #include "ObjetoDesenhavel.hpp"
+#include <SDL3/SDL_pixels.h>
 
 namespace IDJ::MUNDO
 {
     void Mundo::add_desenhavel(ObjetoDesenhavel* obj)
     {
-        this->objetos.emplace(obj);
-        this->desenhaveis.emplace(obj);
+        this->objetos.emplace_back(obj);
+        this->desenhaveis.emplace_back(obj);
     }
     void Mundo::add_obj(Objeto* obj)
     {
-        this->objetos.emplace(obj);
+        this->objetos.emplace_back(obj);
     }
     void Mundo::desenhar()
     {
+        MENSAGENS::ComandoGrafico fundo;
+        fundo.tipo=MENSAGENS::ComandoGrafico::FILLCOR;
+        fundo.dados.fillcor = {
+            .r=0, .g=0, .b=0, .a=255
+        };
+        this->real.receber(fundo);
         for(ObjetoDesenhavel* d:this->desenhaveis)
             d->desenhar();
         this->real.receber({.tipo=MENSAGENS::ComandoGrafico::COMMIT});

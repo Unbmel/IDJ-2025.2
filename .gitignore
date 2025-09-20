@@ -15,6 +15,7 @@ Makefile
 depcomp
 **/stamp-*
 src/autoconf.h
+*~
 
 # Build
 build

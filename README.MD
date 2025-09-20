@@ -29,3 +29,17 @@ Mais informação pode ser encontrada no diretório [docs](./docs/):
 - [Detalhes](./docs/DetalhesTecnicos.md) de decisões técnicas tomadas no desenvolvimento
 - O [planejamento](./docs/Planejamento.md) do projeto
 - A descrição do sistema de [síntese](./docs/Synth.md) de áudio.
+
+# Notas de propriedade intelectual
+
+As músicas descritas na pasta [assets/musica](./assets/musica/) são arranjos originais meus sobre músicas que não são minhas (criados com o software [LMMS](https://lmms.io/)) posteriormente convertidos para o formato que criei aqui usando o script disponível na pasta [scripts](./scripts/midi_to_smidi.py).
+
+Aqui e nos créditos do jogo, listo o seguinte:
+
+- Música:
+    - Take Five
+        - Música usada no combate/fases do jogo
+        - Arranjo para trio de ondas quadradas (e ruído branco) por Amélia O. F da S. (2025), baseado na composição original por Paul Desmond (1959)
+    - See the mighty tree
+        - Música usada no menu
+        - Arranjo para quarteto de ondas quadradas (e ruído branco) por Amélia O. F da S. (2025), baseado na composição original por Louis "Moondog" Thomas Hardin (1981)

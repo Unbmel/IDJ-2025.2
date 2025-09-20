@@ -1,6 +1,6 @@
 #ifndef H_BASE_MUNDO_MUNDO
 #define H_BASE_MUNDO_MUNDO
-#include <set>
+#include <list>
 #include "Objeto.hpp"
 #include "ObjetoDesenhavel.hpp"
 
@@ -8,8 +8,8 @@ namespace IDJ::MUNDO
 {
     class Mundo
     {
-        std::set<Objeto*> objetos;
-        std::set<ObjetoDesenhavel*> desenhaveis;
+        std::list<Objeto*> objetos;
+        std::list<ObjetoDesenhavel*> desenhaveis;
         MENSAGENS::Canal<MENSAGENS::ComandoGrafico> camera;
         MENSAGENS::Canal<MENSAGENS::ComandoGrafico>& real;
         public:

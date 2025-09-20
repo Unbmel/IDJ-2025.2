@@ -56,7 +56,7 @@ namespace IDJ::LOADERS
         for(uint16_t y=0;y<h;y++)
         for(uint32_t x=0;x<w;x+=2)
         {
-            uint8_t in = ptr[(frame*pixels/2)+(y*(w/2))+(x/2)];
+            uint8_t in = ptr[((frame*pixels+1)/2)+(y*((w+1)/2))+(x/2)];
             uint16_t out;
             uint8_t intensidade;
             //Pixel 1

@@ -5,12 +5,13 @@
 #include "../base/jogo/Jogo.hpp"
 #include "../assets.hpp"
 #include "../base/musica/Synth.hpp"
-#include "../base/musica/Seno.hpp"
-#include "../base/SDL.hpp"
+#include "../concreto/musicas/MightyTree.hpp"
+#include "../concreto/musicas/TakeFive.hpp"
 #include <SDL3/SDL_asyncio.h>
 #include <SDL3/SDL_audio.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_keyboard.h>
+#include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_timer.h>
 #include <cstdint>
@@ -18,114 +19,108 @@
 #include <cstdlib>
 #include <iostream>
 
-//Estou recuperando de uma enxaqueca. Não consigo trabalhar direito nem comer e estou com sono e fome
-//É o dia anterior à entrega.
-//Vou apagar isso tudo e fazer um sistema decente para o jogo quando estiver em condição de pensar
-//mas para entregar o requisito de "ter música", vou fazer essa gambiarra e ir dormir
-void gera_notas(void* nulo, SDL_AudioStream* stream, int tanto_min, int tanto_req)
-{
-    static uint16_t freq = 220;
-    uint16_t* samples = (uint16_t*) malloc(tanto_req);
-
-    //1 sample = 1/16000s
-    //T = 1/f s
-    //1 sample = (1/16000)/(1/f) progresso
-    //f/16000 progresso
-    static double progresso = (((double)freq)/(16000));
-    static double cur = 0;
-    static double secs = 0;
-    static uint16_t seminota = 1;
-    static uint16_t notas[]={440, 392, 349, 392};
-    /*
-    n*2^-5 / m*2^-15
-    n/m * 2^10  - 10 bits de fração
-    */
-    static bool troca=0;
-    for(int i=0;i<tanto_req/2;i++)
-    {
-        if(0 && !troca)samples[i]=0;
-        else
-        {
-            /*
-            s*p*2^10
-            */
-            samples[i]=(1<<10)*SDL_sin(cur*2*3.14);
-        }
-        cur+=progresso;
-        cur=SDL_fmod(cur, 1.0);
-        secs+=1.0/16000;
-        if(secs>0.3/2)
-        {
-            secs=0.0;
-            troca=!troca;
-            if(!troca)
-            {
-                freq = notas[seminota/4]/((seminota%2==0?2:1));
-                seminota++;
-                seminota%=16;
-                progresso = (((double)freq)/(16000));
-            }
-        }
-    }
-    SDL_PutAudioStreamData(stream, samples, tanto_req);
-    free(samples);
-}
-
 int main()
 {
     using namespace IDJ;
+    INTERFACE::Janela janela;
+    MUNDO::Mundo mundo(janela.get_canal());
+    MUSICA::Synth synth;
+
     std::cout<<"Carregando e descompactando assets...\n";
     LOADERS::Asset<TAGS::SBMP> placeholder_asset(
         IDJ::ASSETS::_binary_assets_placeholder_sbmp_start,
         IDJ::ASSETS::_binary_assets_placeholder_sbmp_end
     );
+    LOADERS::Asset<TAGS::SBMP> zann_asset(
+        IDJ::ASSETS::_binary_assets_zann_sbmp_start,
+        IDJ::ASSETS::_binary_assets_zann_sbmp_end
+    );
+    BIBLIOTECA::MUSICA::SeeTheMightyTree SeeTheMightyTree(synth);
+    BIBLIOTECA::MUSICA::TakeFive TakeFive(synth);
     std::cout<<"Assets carregados em memória!\n";
-
-    INTERFACE::Janela janela;
-    MUNDO::Mundo mundo(janela.get_canal());
     MUNDO::SBMPDesenhavel placeholder_des(
         mundo.get_camera(), placeholder_asset,
         janela.get_renderer()
     );
-    MUNDO::ObjetoDesenhavel placeholder(placeholder_des);
-    mundo.add_desenhavel(&placeholder);
-
-    JOGO::Jogo jogo(mundo, janela, 30);
-
-    MUSICA::Synth synth;
-    SDL_AudioSpec saida, entrada = {
-        .format=SDL_AUDIO_S16,
-        .channels=1,
-        .freq=16000
-    };
-    int sf;
-    SDL_GetAudioDeviceFormat(synth.get_id(), &saida, &sf);
-    SDL_AudioStream* stream = SDL_CreateAudioStream(&entrada, &saida);
-    if(!stream)sair_erro_SDL("Criação do stream", NULL);
-    SDL_SetAudioStreamGetCallback(
-        stream, 
-        gera_notas,
-        NULL
+    MUNDO::SBMPDesenhavel placeholder2_des(
+        mundo.get_camera(), placeholder_asset,
+        janela.get_renderer()
     );
+    placeholder2_des.sprite.dest.x=placeholder2_des.sprite.dest.w;
+    MUNDO::SBMPDesenhavel zann_des(
+        mundo.get_camera(), zann_asset,
+        janela.get_renderer()
+    );
+    MUNDO::ObjetoDesenhavel placeholder(placeholder_des);
+    MUNDO::ObjetoDesenhavel placeholder2(placeholder2_des);
+    MUNDO::ObjetoDesenhavel zann(zann_des);
+    zann_des.sprite.dest.y=janela.geth()-zann_des.sprite.dest.h;
+    mundo.add_desenhavel(&zann);
+    mundo.add_desenhavel(&placeholder);
+    mundo.add_desenhavel(&placeholder2);
 
-    if(!SDL_BindAudioStream(synth.get_id(), stream))sair_erro_SDL("Bind audio stream", NULL);
+    JOGO::Jogo jogo(mundo, janela, 25); //lixo para causar recompilação 1xsad
+
+    MUSICA::Musica& mus = TakeFive;
+
+    mus.set_repetir();
+    mus.tocar();
 
     //Tudo isso será removido e administrado pelos estados de jogo
-    int16_t vx=10,vy=10, i=0;
+    int16_t vx=7,vy=2, i=0;
+    int16_t vx2=3,vy2=2;
+    int16_t sinal=(1<<15);
     for(;;)
     {
-        jogo.frame_delay();
-        if((i=(i+1)%10)==0)
+        if(mus.batida)
+        {
             placeholder_des.prox_frame();
+            placeholder2_des.prox_frame();
+            mus.batida=0;
+        }
         placeholder_des.sprite.dest.x+=vx;
         placeholder_des.sprite.dest.y+=vy;
-        if(placeholder_des.sprite.dest.x>1200-placeholder_des.sprite.clip.w)vx=-vx;
-        if(placeholder_des.sprite.dest.y>900-placeholder_des.sprite.clip.h)vy=-vy;
-        if(placeholder_des.sprite.dest.x<0)vx=-vx;
-        if(placeholder_des.sprite.dest.y<0)vy=-vy;
+        int16_t mod = vx*(1-2*((uint16_t)(vx&sinal)>>15));
+        if(placeholder_des.sprite.dest.x>1200-placeholder_des.sprite.clip.w)vx=-mod;
+        if(placeholder_des.sprite.dest.x<0){vx=mod;placeholder_des.sprite.dest.x=0;}
+        mod = vy*(1-2*(((uint16_t)vy&sinal)>>15));
+        if(placeholder_des.sprite.dest.y>900-placeholder_des.sprite.clip.h)vy=-mod;
+        if(placeholder_des.sprite.dest.y<0){vy=mod;placeholder_des.sprite.dest.y=0;}
+        
+        placeholder2_des.sprite.dest.x+=vx2;
+        placeholder2_des.sprite.dest.y+=vy2;
+        mod = vx2*(1-2*((uint16_t)(vx2&sinal)>>15));
+        if(placeholder2_des.sprite.dest.x>1200-placeholder2_des.sprite.clip.w)vx2=-mod;
+        if(placeholder2_des.sprite.dest.x<0){vx2=mod;placeholder2_des.sprite.dest.x=0;}
+        mod = vy2*(1-2*((uint16_t)(vy2&sinal)>>15));
+        if(placeholder2_des.sprite.dest.y>900-placeholder2_des.sprite.clip.h)vy2=-mod;
+        if(placeholder2_des.sprite.dest.y<0){vy2=mod;placeholder2_des.sprite.dest.y=0;}
+        
+        jogo.frame_delay();
+
+        //Demonstração de colisão
+        struct {int16_t x; int16_t y;} dirs[4] = {
+            {1, 1}, {-1, 1}, {1, -1}, {-1,-1}
+        };
+        SDL_Point pontos[4] = {
+            {.x=placeholder_des.sprite.dest.x,.y=placeholder_des.sprite.dest.y},
+            {.x=placeholder_des.sprite.dest.x+placeholder_des.sprite.dest.w,.y=placeholder_des.sprite.dest.y},
+            {.x=placeholder_des.sprite.dest.x,.y=placeholder_des.sprite.dest.y+placeholder_des.sprite.dest.h},
+            {.x=placeholder_des.sprite.dest.x+placeholder_des.sprite.dest.w,.y=placeholder_des.sprite.dest.y+placeholder_des.sprite.dest.h},
+        };
+        for(int j=0;j<4;j++)
+        {
+            if(SDL_PointInRect(&pontos[j], &placeholder2_des.sprite.dest))
+            {
+                if(!(vx*dirs[j].x>0))vx=-vx;
+                if(!(vy*dirs[j].y>0))vy=-vy;
+                if((vx2*dirs[j].x>0))vx2=-vx2;
+                if((vy2*dirs[j].y>0))vy2=-vy2;
+            }
+        }
+
         SDL_PumpEvents();
         const bool* keys = SDL_GetKeyboardState(NULL);
         if(keys[SDL_SCANCODE_Q])break;//Isso não detecta caso alguém pressione e solte entre frames
     }
-    SDL_UnbindAudioStream(stream);
 }

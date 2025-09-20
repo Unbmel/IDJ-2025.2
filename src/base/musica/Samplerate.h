@@ -1,0 +1,4 @@
+#ifndef H_MUSICA_SAMPLERATE
+#define H_MUSICA_SAMPLERATE
+#define SAMPLERATE 16000
+#endif

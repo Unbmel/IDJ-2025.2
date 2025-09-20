@@ -1,16 +1,17 @@
 #include "Janela.hpp"
 #include "../SDL.hpp"
+#include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_render.h>
 #include <cstdio>
 
 namespace IDJ::INTERFACE
 {
-    Janela::Janela(): real(this, tratar_grafico)
+    Janela::Janela(): real(this, tratar_grafico), w(1200), h(900)
     {
         this->Win = SDL_CreateWindow(
             "Amélia Oliveira Freitas da Silva - 190037971",
-            1200, 900,
+            this->w, this->h,
             SDL_WINDOW_OPENGL
         );
         if(!this->Win)IDJ::sair_erro_SDL("Erro na inicialização da janela", NULL);
@@ -32,11 +33,21 @@ namespace IDJ::INTERFACE
     {
         return this->real;
     }
+    int Janela::geth(){return this->h;}
+    int Janela::getw(){return this->w;}
     void Janela::tratar_grafico(void *ref_obj, MENSAGENS::ComandoGrafico cmd)
     {
         Janela* self = (Janela*)ref_obj;
         switch(cmd.tipo)
         {
+            case MENSAGENS::ComandoGrafico::FILLCOR:
+                SDL_FRect tudo;
+                tudo.h=self->h;
+                tudo.w=self->w;
+                tudo.x=0;
+                tudo.y=0;
+                SDL_RenderFillRect(self->render, &tudo);
+            break;
             case MENSAGENS::ComandoGrafico::DESENHA:
             {
                 SDL_FRect clip = {

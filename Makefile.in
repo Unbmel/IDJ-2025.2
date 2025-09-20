@@ -4,13 +4,19 @@ opcoes:
 	@echo "Targets:"
 	@echo "make testes - Cria os binários de teste"
 	@echo "make jogo - Cria o binário final"
+	@echo "make estatico - Cria o binário final (linkagem estática)"
 	@echo
 	@ if [[ "@ASSETS_COMPRIMIDOS@" ]];then echo "ZLib foi encontrada. Assets serão comprimidos antes do uso.";fi
 jogo:
 	@make objs
 	@make assetsobj
 	@mkdir -p build/bin
-	@CXX@ -o build/bin/jogo@EXEEXT@ build/entrypoints/jogo.@OBJEXT@ $$(find build/base -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@") @LIBS@ -lstdc++ ;
+	@CXX@ -O3 -o build/bin/jogo@EXEEXT@ build/entrypoints/jogo.@OBJEXT@ $$(find build/base -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@") @LIBS@ -lstdc++ ;
+estatico:
+	@make objs
+	@make assetsobj
+	@mkdir -p build/bin
+	@CXX@ -o build/bin/jogo@EXEEXT@ --static build/entrypoints/jogo.@OBJEXT@ $$(find build/base -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@") @LIBS@ -lstdc++ ;
 testes:
 	@make objs
 	@make assetsobj
@@ -22,7 +28,7 @@ build/bin/testes/%@EXEEXT@: build/entrypoints/%.@OBJEXT@ build/base_debug/* buil
 	@CXX@ -g -o "$@""@EXEEXT@" $< $$(find build/base_debug -name "*.@OBJEXT@") $$(find build/assets -name "*.@OBJEXT@") @LIBS@ -lstdc++;
 build/base/%.@OBJEXT@: src/base/%.cpp
 	@mkdir -p $$(dirname $@)
-	@CXX@ -c -o $@ $<
+	@CXX@ -c -O3 -o $@ $<
 build/base_debug/%.@OBJEXT@: src/base/%.cpp
 	@mkdir -p $$(dirname $@)
 	@CXX@ -c -g -o $@ $<
@@ -40,7 +46,7 @@ objs:
 		make build/entrypoints/$$(dirname $$file)/$$(basename $$file .cpp).@OBJEXT@;\
 	done
 build/assets/%.@OBJEXT@: assets/%
-	mkdir -p $$(dirname $<)
+	mkdir -p build/$$(dirname $<)
 	@if [[ "@ASSETS_COMPRIMIDOS@" ]];then\
 		echo "Comprimindo $<";\
 		mv $< $<.tmp;\
